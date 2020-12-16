@@ -541,6 +541,22 @@ def getPairWiseDistanceToBathRoom(model,rooms , max):
 def sunRoomConstraint(model, room, grid):
     model.AddBoolAnd([isSunRoom(model, room, grid)])
 
+# Adds a constraint that the minimum distance between all apartments and the elevator room is equal.
+def ensureEqualDistanceToElevator (model, apartments , elevatorRoom , max):
+    last =  None
+    mxVar  = model.NewIntVar(max,max,'')
+    for ap in range(0,len(apartments)):
+        distances = [mxVar]
+        for room in apartments[ap]:
+            distances.append(getDistance(model,room,elevatorRoom,max))
+        curMinDist =  model.NewIntVar(0,max,'')
+        model.AddMinEquality(curMinDist,distances)
+        if ap==0 :
+            last = curMinDist
+        else:
+            model.Add(last==curMinDist)
+
+
 
 if __name__ == "__main__":
     model = cp_model.CpModel()

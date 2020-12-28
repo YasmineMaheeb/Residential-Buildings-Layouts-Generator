@@ -78,8 +78,9 @@ if __name__ == "__main__":
         if (True):  # todo: input from user
             aptOpenAreaConstraint(model, apt, onOpenArea, grid)
 
-    sameTypeApts = [apartments[1], apartments[2]]
-    symmetricApts(model, sameTypeApts)
+    # sameTypeApts = [apartments[1], apartments[2]]
+    # symmetricApts(model, sameTypeApts)
+    ensureApartmentSymmetry(model,apartments[1],apartments[2],4)
 
     model.Maximize(countSunRooms + countLessThan + countGreaterThan - totalDistBedrooms - totalDistBathrooms)
 

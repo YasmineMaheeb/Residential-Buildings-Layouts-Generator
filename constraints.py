@@ -302,3 +302,15 @@ def ensureEqualDistanceToElevator(model, apartments, elevatorRoom, max):
             last = curMinDist
         else:
             model.Add(last == curMinDist)
+
+# Ensures that two apartments are symmetrical along the y-axis
+#(MAKE SURE THAT THE ORDER IN THE LIST IS THE SAME)
+def ensureApartmentSymmetry (model ,apartment1 , apartment2 , midX):
+    n = len(apartment1)
+    for i in range(n):
+        room1  = apartment1[i]
+        room2  = apartment2[i]
+        model.Add(room2['ay']-midX==midX-room1['by'])
+        model.Add(midX-room1['ay']==room2['by']-midX)
+        model.Add(room2['ax']==room1['ax'])
+        model.Add(room2['bx']==room1['bx'])

@@ -10,21 +10,52 @@ if __name__ == "__main__":
     numberOfApartments = int(input("Enter number of apartments: "))
     widthOfBuilding = int(input("Enter width of building(rows): "))
     lengthOfBuilding = int(input("Enter height of building(cols): "))
+    print("You will be asked some questions answer by y/n")
+    isOpenWall = [0,0,0,0]
+    for i in range(4):
+        isOpenWall[i] = "y" in input("is the wall number "+ str(i+1)+ " on an open area: ")
 
     onOpenArea = {
-        "left": 0, "right": 0, "top": 1, "bottom": 0
+        "left": isOpenWall[0], "right": isOpenWall[1], "top": isOpenWall[2], "bottom": isOpenWall[3]
     }
+
     domain = ['D']
 
-    minArea = 2
-    apartments = [
-        [createRoom("K_AP1_1", minArea), createRoom("BD_AP1_1", minArea), createRoom("BD_AP1_2", minArea)],
-        [createRoom("K_AP2_1", minArea), createRoom("K_AP2_2", minArea),
-         createRoom("DN_AP2_1", minArea), createRoom("BD_AP2_1", minArea), createRoom("DR_AP2_1", minArea)],
-        [createRoom("K_AP3_1", minArea), createRoom("K_AP3_2", minArea),
-         createRoom("DN_AP3_1", minArea), createRoom("BD_AP3_1", minArea), createRoom("DR_AP3_1", minArea)],
-        [createRoom("BD_AP4_1", minArea), createRoom("MSB_AP4_1", minArea)]
-    ]
+    allApartmentsOnOpenArea = "y" in input("Should all apartments have look on landscape view? ")
+    allEqualDistanceToElev = "y" in input("Should all apartments be of an equal distance to the elevators unit? ")
+    symmetricApartements = "y" in input("Should apartments of same type be symmetric? ")
+    divineProportion = "y" in input("Should we aim to allocate spaces with ratios following the divine proportion? ")
+
+    sameTypePairs = []
+    numberOfPairs = int(input("Please enter number of same type apartment pairs: "))
+    for i in range(numberOfPairs):
+        print("Pair number "+str(i+1))
+        x = int(input("Please enter id (1 indexed) of first apartment in the pair: ")) -1
+        y = int(input("Please enter id (1 indexed) of second apartment in the pair: ")) -1
+        sameTypePairs.append([x,y])
+
+    apartments = []
+    for i in range (numberOfApartments):
+        numberOfRooms = int(input("Please enter the number of rooms of apartment number "+str(i+1)+": "))
+        curRooms = []
+        for j in range(numberOfRooms):
+            curRoomName = input("Please enter room code for room number "+str(j+1)+":")
+            curMinArea = input("Please enter minimum area for room number "+str(j+1)+":")
+            curMinHeight = input("Please enter minimum height for room number "+str(j+1)+":")
+            curMinWidth = input("Please enter minimum width for room number "+str(j+1)+":")
+            curRooms.append(createRoom(curRoomName,curMinArea,curMinHeight,curMinWidth))
+        apartments.append(curRooms)
+    # print(apartments)all apartments have look on landscape view
+
+    # minArea = 2
+    # apartments = [
+    #     [createRoom("K_AP1_1", minArea), createRoom("BD_AP1_1", minArea), createRoom("BD_AP1_2", minArea)],
+    #     [createRoom("K_AP2_1", minArea), createRoom("K_AP2_2", minArea),
+    #      createRoom("DN_AP2_1", minArea), createRoom("BD_AP2_1", minArea), createRoom("DR_AP2_1", minArea)],
+    #     [createRoom("K_AP3_1", minArea), createRoom("K_AP3_2", minArea),
+    #      createRoom("DN_AP3_1", minArea), createRoom("BD_AP3_1", minArea), createRoom("DR_AP3_1", minArea)],
+    #     [createRoom("BD_AP4_1", minArea), createRoom("MSB_AP4_1", minArea)]
+    # ]
 
     corridors = [createRoom(f'xxxxxxxx{i}', 1) for i in range(numberOfApartments)]
     corridors += [createRoom("ELR", 1), createRoom("SW", 1)]
@@ -75,12 +106,19 @@ if __name__ == "__main__":
     for apt in apartments:
         aptAdjacencyConstraint(model, apt, grid, domain)
         enforceComponencyConstraint(model, apt)
-        if (True):  # todo: input from user
+        if (allApartmentsOnOpenArea):
             aptOpenAreaConstraint(model, apt, onOpenArea, grid)
 
     # sameTypeApts = [apartments[1], apartments[2]]
     # symmetricApts(model, sameTypeApts)
-    ensureApartmentSymmetry(model,apartments[1],apartments[2],4)
+
+    midX = 4 #TODO change dynamically
+    if (symmetricApartements):
+        for pair in sameTypePairs:
+            ensureApartmentSymmetry(model,apartments[pair[0]],apartments[pair[1]], midX)
+
+    # if (divineProportion):
+
 
     model.Maximize(countSunRooms + countLessThan + countGreaterThan - totalDistBedrooms - totalDistBathrooms)
 

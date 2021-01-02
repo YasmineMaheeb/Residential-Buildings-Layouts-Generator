@@ -17,16 +17,23 @@ if __name__ == "__main__":
     domain = ['D']
 
     minArea = 2
+
     apartments = [
-        [createRoom("K_AP1_1", minArea), createRoom("BD_AP1_1", minArea), createRoom("BD_AP1_2", minArea)],
+        #[createRoom("K_AP1_1", minArea), createRoom("BD_AP1_1", minArea), createRoom("BD_AP1_2", minArea),
+        # createRoom("CR_AP1_1", 1)],
         [createRoom("K_AP2_1", minArea), createRoom("K_AP2_2", minArea),
-         createRoom("DN_AP2_1", minArea), createRoom("BD_AP2_1", minArea), createRoom("DR_AP2_1", minArea)],
+         createRoom("CR_AP2_1", 1), createRoom("CR_AP2_2", 1), createRoom("CR_AP2_3", 1),
+         createRoom("DN_AP2_1", minArea), createRoom("BD_AP2_1", minArea), createRoom("DR_AP2_1", minArea),
+         createRoom("MNB_AP2_#2", 1), createRoom("MNB_AP2_1", 1)],
         [createRoom("K_AP3_1", minArea), createRoom("K_AP3_2", minArea),
-         createRoom("DN_AP3_1", minArea), createRoom("BD_AP3_1", minArea), createRoom("DR_AP3_1", minArea)],
-        [createRoom("BD_AP4_1", minArea), createRoom("MSB_AP4_1", minArea)]
+         createRoom("CR_AP3_1", 1), createRoom("CR_AP3_2", 1), createRoom("CR_AP3_3", 1),
+         createRoom("DN_AP3_1", minArea), createRoom("BD_AP3_1", minArea), createRoom("DR_AP3_1", minArea),
+         createRoom("MNB_AP3_#2", 1), createRoom("MNB_AP3_1", 1)]  # ,
+        # [createRoom("BD_AP4_1", minArea), createRoom("MSB_AP4_1", minArea), createRoom("CR_AP4_1", 1)]
     ]
 
-    corridors = [createRoom(f'xxxxxxxx{i}', 1) for i in range(numberOfApartments)]
+    corridors = [createRoom(f'xxxxxxxx{i}', 1)
+                 for i in range(numberOfApartments)]
     corridors += [createRoom("ELR", 1), createRoom("SW", 1)]
 
     rooms = [room for apartment in apartments for room in apartment]
@@ -52,7 +59,8 @@ if __name__ == "__main__":
             roomConstraint(model, room, grid, domain)
             if 'SN_' in room['val']:
                 sunRoomConstraint(model, room, grid)
-            roomAdjacencyConstraint(model, room, grid, domain)
+            if 'CR_' not in room['val']:
+                roomAdjacencyConstraint(model, room, grid, domain)
 
     enforceComponencyConstraint(model, corridors)
 
@@ -74,15 +82,17 @@ if __name__ == "__main__":
 
     for apt in apartments:
         aptAdjacencyConstraint(model, apt, grid, domain)
-        enforceComponencyConstraint(model, apt)
+        enforceComponencyConstraint(model, list(
+            filter(lambda room: 'CR' in room['val'], apt)))
         if (True):  # todo: input from user
             aptOpenAreaConstraint(model, apt, onOpenArea, grid)
 
     # sameTypeApts = [apartments[1], apartments[2]]
     # symmetricApts(model, sameTypeApts)
-    ensureApartmentSymmetry(model,apartments[1],apartments[2],4)
+    ensureApartmentSymmetry(model, apartments[0], apartments[1], 4)
 
-    model.Maximize(countSunRooms + countLessThan + countGreaterThan - totalDistBedrooms - totalDistBathrooms)
+    model.Maximize(countSunRooms + countLessThan +
+                   countGreaterThan - totalDistBedrooms - totalDistBathrooms)
 
     solver = cp_model.CpSolver()
     status = solver.Solve(model)

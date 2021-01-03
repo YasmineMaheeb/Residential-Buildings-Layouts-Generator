@@ -24,7 +24,9 @@ def roomConstraint(model, room, grid, domain):
     ay = room['ay']
     bx = room['bx']
     by = room['by']
-
+    print(minHeight)
+    print(gridH)
+    print()
     height = model.NewIntVar(minHeight, gridH, '')
     width = model.NewIntVar(minWidth, gridW, '')
     area = model.NewIntVar(minArea, gridH * gridW, '')

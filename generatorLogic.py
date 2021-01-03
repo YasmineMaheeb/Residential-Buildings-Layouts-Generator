@@ -123,18 +123,17 @@ if __name__ == "__main__":
 
 
 
-    midX = lengthOfBuilding //2 #TODO check
+    midX = lengthOfBuilding //2 
     if (symmetricApartements):
         for pair in sameTypePairs:
             ensureApartmentSymmetry(model,apartments[pair[0]],apartments[pair[1]], midX)
 
 
-    # if (allEqualDistanceToElev):
-    #     ensureEqualDistanceToElevator(model,apartments,corridors[numberOfApartments],??)
+    if (allEqualDistanceToElev):
+        ensureEqualDistanceToElevator(model,apartments,corridors[numberOfApartments],widthOfBuilding+lengthOfBuilding)
 
-    # TODO is widthOfBuilding correct for mx?
     for room in divPropRooms:
-        ensureGoldenRatio(model, room, widthOfBuilding)
+        ensureGoldenRatio(model, room, widthOfBuilding+lengthOfBuilding)
 
     model.Maximize(countSunRooms + countLessThan + countGreaterThan - totalDistBedrooms - totalDistBathrooms)
 

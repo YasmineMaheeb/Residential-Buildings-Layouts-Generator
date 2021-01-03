@@ -2,12 +2,7 @@ from roomUtility import *
 
 
 def roomConstraint(model, room, grid, domain):
-    # room =
-    # {
-    #   'ax':, 'ay':, \\ x and y are the or tool variables representing point a
-    #   'bx':, 'by':,
-    #   'val': \\ val is the val that is assigned on the grid for this room
-    # }
+    """initializes the room object with OR-Tools variables, and adds a constraint that ensures they match the grid"""
 
     minArea = room['minArea']
     minHeight = room['minHeight']
@@ -49,8 +44,8 @@ def matchCellToRoom(ax, ay, bx, by, cell, colIdx, model, room, rowIdx, domain):
     model.Add(cell != domain.index(room['val'])).OnlyEnforceIf(inRoom.Not())
 
 
-# Adds a Constraint that all rooms should be connected (i.e There is a path from each room to all other rooms)
 def enforceComponencyConstraint(model, rooms):
+    """Adds a Constraint that all rooms should be connected (i.e There is a path from each room to all other rooms)"""
     n = len(rooms)
     path = [None for y in range(n)]
     initial = []
@@ -80,9 +75,10 @@ def enforceComponencyConstraint(model, rooms):
 
 
 def aptAdjacencyConstraint(model, apt, grid, domain):
+    """adds a constraint that one corridor in apt must be adjacent to one hallway"""
     nextList = filter(lambda d: "xxx" in d, domain)
     boolVars = []
-    corridors = filter(lambda room: "CR" in room['val'], apt)
+    corridors = filter(lambda x: "CR" in x['val'], apt)
     for room in corridors:
         for nextElem in nextList:
             upperX = model.NewIntVar(-1, len(grid), '')
@@ -116,6 +112,8 @@ def aptAdjacencyConstraint(model, apt, grid, domain):
 
 
 def roomAdjacencyConstraint(model, room, grid, domain):
+    """adds a constraint the ensures that every room is adjacent to what it needs to be adjacent too,
+    depending on the input."""
     split = room["val"].split("_")
     roomType = split[0]
     apt = split[1]
@@ -172,7 +170,7 @@ def roomAdjacencyConstraint(model, room, grid, domain):
                             (nextElem == x.split("_")[0]) and
                             (assRoom == "" or (len(x) > 1 and assRoom == x.split("_")[2]) or len(x) == 1)),
                     domain))
-                if (rowIdx == 0 and colIdx == 0):
+                if rowIdx == 0 and colIdx == 0:
                     print(f'{room["val"]} adj to one in {adjacentRooms}')
 
                 for adjacentRoom in adjacentRooms:
@@ -199,6 +197,7 @@ def createRoom(val, minArea, minHeight=0, minWidth=0, ax=None, ay=None, bx=None,
 
 
 def getCountSunRooms(model, apts, grid):
+    """Returns an OR-Tools variable that holds the count of sun rooms"""
     boolVars = []
     for apt in apts:
         for room in apt:
@@ -207,6 +206,7 @@ def getCountSunRooms(model, apts, grid):
 
 
 def aptOpenAreaConstraint(model, apt, onOpenArea, grid):
+    """adds a constraint that ensures an apt is on an open area"""
     boolvars = []
     for room in apt:
         for key, value in onOpenArea.items():
@@ -225,14 +225,15 @@ def symmetricRooms(model, rooms):
         model.Add(area == room['area'])
 
 
+# deprecated?
 def symmetricApts(model, apts):
     numRooms = len(apts[0])
     for i in range(numRooms):
         symmetricRooms(model, [apt[i] for apt in apts])
 
 
-# Adds Constraint that the room follows the golden ratio (approximated ratio)
 def ensureGoldenRatio(model, room, mx):
+    """Adds Constraint that the room follows the golden ratio (approximated ratio)"""
     x = model.NewIntVar(0, mx, '')
     y = model.NewIntVar(0, mx, '')
     model.Add(x == room['bx'] - room['ax'] + 1)
@@ -244,42 +245,45 @@ def ensureGoldenRatio(model, room, mx):
     model.Add(10 * c == 16 * a)
 
 
-def getCountDistanceLessThan(model, roomTuples, max):
+def getCountDistanceLessThan(model, roomTuples, maxVal):
+    """Returns an OR-Tools variable hold the count of tuples in roomTuples that satisfy the condition"""
     boolVars = []
     for rooma, roomb, val in roomTuples:
-        boolVars.append(isDistanceLessThan(model, rooma, roomb, val, max))
+        boolVars.append(isDistanceLessThan(model, rooma, roomb, val, maxVal))
     return getSum(model, boolVars, len(roomTuples))
 
 
-def getCountDistanceGreaterThan(model, roomTuples, max):
+def getCountDistanceGreaterThan(model, roomTuples, maxVal):
+    """Returns an OR-Tools variable hold the count of tuples in roomTuples that satisfy the condition"""
     boolVars = []
     for rooma, roomb, val in roomTuples:
-        boolVars.append(isDistanceGreaterThan(model, rooma, roomb, val, max))
+        boolVars.append(isDistanceGreaterThan(model, rooma, roomb, val, maxVal))
     return getSum(model, boolVars, len(roomTuples))
 
 
-# Return an Int Variables that stores the distance between each pair of bedrooms
-# max is equal to the maximum possible distance between any two pair of rooms (i.e height+width of floor)
-def getPairWiseDistanceBetWeenBedroom(model, rooms, max):
+def getPairWiseDistanceBetWeenBedroom(model, rooms, maxVal):
+    """Return an Int Variables that stores the distance between each pair of bedrooms
+    max is equal to the maximum possible distance between any two pair of rooms (i.e height+width of floor)"""
     n = len(rooms)
-    max2 = n * n * max;
-    sum = model.NewIntVar(0, 0, '')
+    max2 = n * n * maxVal
+    sumVal = model.NewIntVar(0, 0, '')
     for i in range(0, n):
         if isBedroom(rooms[i]):
             for j in range(i + 1, n):
                 if isBedroom(rooms[j]):
                     newSum = model.NewIntVar(0, max2, '')
-                    model.Add(newSum == sum + getDistance(model, rooms[i], rooms[j], max))
-                    sum = newSum
-    return sum
+                    model.Add(newSum == sumVal + getDistance(model, rooms[i], rooms[j], maxVal))
+                    sumVal = newSum
+    return sumVal
 
 
-# Return an Int Variables that stores the distance between MainBathroom to all other rooms (Living room is multiplied by a factor of 2)
-# max is equal to the maximum possible distance between any two pair of rooms (i.e height+width of floor)
-def getPairWiseDistanceToBathRoom(model, rooms, max):
+def getPairWiseDistanceToBathRoom(model, rooms, maxVal):
+    """Return an Int Variables that stores the distance between MainBathroom to all other rooms (Living room is
+    multiplied by a factor of 2) max is equal to the maximum possible distance between any two pair of rooms
+    (i.e height+width of floor)"""
     n = len(rooms)
-    max2 = n * n * max;
-    sum = model.NewIntVar(0, 0, '')
+    max2 = n * n * maxVal
+    sumVal = model.NewIntVar(0, 0, '')
     for i in range(0, n):
         if isMainBathroom(rooms[i]):
             for j in range(0, n):
@@ -289,24 +293,24 @@ def getPairWiseDistanceToBathRoom(model, rooms, max):
                 factor = 1
                 if isLivingRoom(rooms[j]):
                     factor = 2
-                model.Add(newSum == sum + factor * getDistance(model, rooms[i], rooms[j], max))
-                sum = newSum
-    return sum
+                model.Add(newSum == sumVal + factor * getDistance(model, rooms[i], rooms[j], maxVal))
+                sumVal = newSum
+    return sumVal
 
 
 def sunRoomConstraint(model, room, grid):
     model.AddBoolAnd([isSunRoom(model, room, grid)])
 
 
-# Adds a constraint that the minimum distance between all apartments and the elevator room is equal.
-def ensureEqualDistanceToElevator(model, apartments, elevatorRoom, max):
+def ensureEqualDistanceToElevator(model, apartments, elevatorRoom, maxVal):
+    """Adds a constraint that the minimum distance between all apartments and the elevator room is equal."""
     last = None
-    mxVar = model.NewIntVar(max, max, '')
+    mxVar = model.NewIntVar(maxVal, maxVal, '')
     for ap in range(0, len(apartments)):
         distances = [mxVar]
         for room in apartments[ap]:
-            distances.append(getDistance(model, room, elevatorRoom, max))
-        curMinDist = model.NewIntVar(0, max, '')
+            distances.append(getDistance(model, room, elevatorRoom, maxVal))
+        curMinDist = model.NewIntVar(0, maxVal, '')
         model.AddMinEquality(curMinDist, distances)
         if ap == 0:
             last = curMinDist
@@ -314,9 +318,9 @@ def ensureEqualDistanceToElevator(model, apartments, elevatorRoom, max):
             model.Add(last == curMinDist)
 
 
-# Ensures that two apartments are symmetrical along the y-axis
-# (MAKE SURE THAT THE ORDER IN THE LIST IS THE SAME)
 def ensureApartmentSymmetry(model, apartment1, apartment2, midX):
+    """Ensures that two apartments are symmetrical along the y-axis
+    (MAKE SURE THAT THE ORDER IN THE LIST IS THE SAME)"""
     n = len(apartment1)
     for i in range(n):
         room1 = apartment1[i]

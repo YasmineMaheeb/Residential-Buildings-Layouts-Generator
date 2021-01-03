@@ -1,22 +1,23 @@
 from genericUtility import *
 
 
-def getDistance(model, room1, room2, max):
-    d = model.NewIntVar(0, max, '')
+def getDistance(model, room1, room2, maxVal):
+    """Returns an OR-Tools variable that holds the manhattan distance between the centers of room1 and room2"""
+    d = model.NewIntVar(0, maxVal, '')
 
-    midXRoom1 = getMid(model, max, room1["ax"], room1["bx"])
-    midYRoom1 = getMid(model, max, room1["ay"], room1["by"])
-    midXRoom2 = getMid(model, max, room2["ax"], room2["bx"])
-    midYRoom2 = getMid(model, max, room2["ay"], room2["by"])
+    midXRoom1 = getMid(model, maxVal, room1["ax"], room1["bx"])
+    midYRoom1 = getMid(model, maxVal, room1["ay"], room1["by"])
+    midXRoom2 = getMid(model, maxVal, room2["ax"], room2["bx"])
+    midYRoom2 = getMid(model, maxVal, room2["ay"], room2["by"])
 
-    diffX = model.NewIntVar(0, max, '')
-    diffY = model.NewIntVar(0, max, '')
+    diffX = model.NewIntVar(0, maxVal, '')
+    diffY = model.NewIntVar(0, maxVal, '')
 
     model.Add(diffX == midXRoom1 - midXRoom2)
     model.Add(diffY == midYRoom1 - midYRoom2)
 
-    absDiffX = model.NewIntVar(0, max, '')
-    absDiffY = model.NewIntVar(0, max, '')
+    absDiffX = model.NewIntVar(0, maxVal, '')
+    absDiffY = model.NewIntVar(0, maxVal, '')
 
     model.AddAbsEquality(absDiffX, diffX)
     model.AddAbsEquality(absDiffY, diffY)
@@ -26,9 +27,10 @@ def getDistance(model, room1, room2, max):
     return d
 
 
-def getMid(model, max, pointa, pointb):
-    sum = model.NewIntVar(0, max, '')
-    mid = model.NewIntVar(0, max, '')
+def getMid(model, maxVal, pointa, pointb):
+    """Returns an OR-Tools variable that holds the middle point between pointa and pointb"""
+    sum = model.NewIntVar(0, maxVal, '')
+    mid = model.NewIntVar(0, maxVal, '')
     model.Add(sum == (pointa + pointb))
     model.AddDivisionEquality(mid, sum, 2)
     return mid
@@ -52,18 +54,19 @@ def isMainBathroom(room):
     return type == 'MSB'
 
 
-# Returns a boolean Variable that specifies whether the distance between roomA and roomB is less than the value
-def isDistanceLessThan(model, roomA, roomB, value, max):
-    dist = getDistance(model, roomA, roomB, max)
+def isDistanceLessThan(model, roomA, roomB, value, maxVal):
+    """Returns a boolean Variable that specifies whether the distance between roomA and roomB is less than the value"""
+    dist = getDistance(model, roomA, roomB, maxVal)
     b = model.NewBoolVar('')
     model.Add(dist < value).OnlyEnforceIf(b)
     model.Add(dist >= value).OnlyEnforceIf(b.Not())
     return b
 
 
-# Returns a boolean Variable that specifies whether the distance between roomA and roomB is greater than the value
-def isDistanceGreaterThan(model, roomA, roomB, value, max):
-    dist = getDistance(model, roomA, roomB, max)
+def isDistanceGreaterThan(model, roomA, roomB, value, maxVal):
+    """Returns a boolean Variable that specifies whether the distance between roomA and roomB is greater than the
+    value """
+    dist = getDistance(model, roomA, roomB, maxVal)
     b = model.NewBoolVar('')
     model.Add(dist > value).OnlyEnforceIf(b)
     model.Add(dist <= value).OnlyEnforceIf(b.Not())
@@ -71,12 +74,14 @@ def isDistanceGreaterThan(model, roomA, roomB, value, max):
 
 
 def isOnBorder(model, border, isHorizontal, room):
-    if (isHorizontal):
+    """Returns an OR-Tools variable that is true if room is on the specified border of the apartment"""
+    if isHorizontal:
         return isOr(model, [isEqual(model, room['ax'], border), isEqual(model, room['bx'], border)])
     return isOr(model, [isEqual(model, room['ay'], border), isEqual(model, room['by'], border)])
 
 
 def isSunRoom(model, room, grid):
+    """Returns an OR-Tools variable that is true if room is on one of the borders of the apartment"""
     b1 = isOnBorder(model, 0, True, room)
     b2 = isOnBorder(model, 0, False, room)
     b3 = isOnBorder(model, len(grid) - 1, True, room)
@@ -84,8 +89,8 @@ def isSunRoom(model, room, grid):
     return isOr(model, [b1, b2, b3, b4])
 
 
-# Returns a boolean variable that specifies whether roomA is adjacent to roomB
 def isAdjacent(model, u, v, roomA, roomB):
+    """Returns a boolean variable that specifies whether roomA is adjacent to roomB"""
     b = model.NewBoolVar('%i %i' % (u, v))
     if u == v:
         model.Add(b == True)
@@ -100,10 +105,10 @@ def isAdjacent(model, u, v, roomA, roomB):
     return b
 
 
-# Returns a boolean variable that specifies whether roomA and roomB are diagonals to each other
-# ROOMA is bounded by points (a,b,c,d) where a is the top left and the b is top right and so on
-# similarily, ROOMB is bounded by points (e,f,g,h)
 def isDiagonal(model, roomA, roomB):
+    """Returns a boolean variable that specifies whether roomA and roomB are diagonals to each other
+    ROOMA is bounded by points (a,b,c,d) where a is the top left and the b is top right and so on
+    similarly, ROOMB is bounded by points (e,f,g,h)"""
     ax = roomA['ax']
     ay = roomA['ay']
     dx = roomA['bx']
@@ -126,8 +131,8 @@ def isDiagonal(model, roomA, roomB):
                         isbBLa(model, gx, gy, bx, by)])
 
 
-# Returns boolean variables that specifies point B is not Bottom Right Point A
 def isbBRa(model, ax, ay, bx, by):
+    """Returns boolean variables that specifies point B is not Bottom Right Point A"""
     b1 = model.NewBoolVar('')
     model.Add(ax == bx - 1).OnlyEnforceIf(b1)
     model.Add(ax != bx - 1).OnlyEnforceIf(b1.Not())
@@ -137,8 +142,8 @@ def isbBRa(model, ax, ay, bx, by):
     return isAnd(model, [b1, b2])
 
 
-# Returns boolean variables that specifies point B is not Bottom Left Point A
 def isbBLa(model, ax, ay, bx, by):
+    """Returns boolean variables that specifies point B is not Bottom Left Point A"""
     b1 = model.NewBoolVar('')
     model.Add(ax == bx - 1).OnlyEnforceIf(b1)
     model.Add(ax != bx - 1).OnlyEnforceIf(b1.Not())
@@ -148,8 +153,8 @@ def isbBLa(model, ax, ay, bx, by):
     return isAnd(model, [b1, b2])
 
 
-# Returns boolean variables that specifies if point p lies between roomQ
 def between(model, px, py, roomQ):
+    """Returns boolean variables that specifies if point p lies between roomQ"""
     b1 = model.NewBoolVar('')
     model.Add(roomQ['bx'] + 1 >= px).OnlyEnforceIf(b1)
     model.Add(roomQ['bx'] + 1 < px).OnlyEnforceIf(b1.Not())

@@ -1,0 +1,105 @@
+{
+  "length": 8,
+  "width": 8,
+  "apartments": [
+    [
+      {
+        "val": "BD_AP1_1",
+        "minArea": 3,
+        "minHeight": 2,
+        "minWidth": 1
+      },
+      {
+        "val": "MNB_AP1_1",
+        "minArea": 1,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "MJB_AP1_1",
+        "minArea": 2,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "DR_AP1_1",
+        "minArea": 1,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "K_AP1_1",
+        "minArea": 3,
+        "minHeight": 1,
+        "minWidth": 2
+      },
+      {
+        "val": "DN_AP1_1",
+        "minArea": 3,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "CR_AP1_1",
+        "minArea": 1,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "CR_AP1_2",
+        "minArea": 1,
+        "minHeight": 1,
+        "minWidth": 1
+      }
+    ],
+    [
+      {
+        "val": "K_AP2_1",
+        "minArea": 1,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "BD_AP2_1",
+        "minArea": 2,
+        "minHeight": 1,
+        "minWidth": 1
+      },
+      {
+        "val": "CR_AP2_1",
+        "minArea": 1,
+        "minHeight": 1,
+        "minWidth": 1
+      }
+    ]
+  ],
+  "onOpenArea": {
+    "left": true,
+    "right": true,
+    "top": true,
+    "bottom": true
+  },
+  "allOnOpenArea": false,
+  "allEqualToElev": true,
+  "symmetricApartments": false,
+  "symmetricPairs": [
+    [
+      0,
+      1
+    ]
+  ],
+  "distLessThan": [
+    {
+      "room1": {
+        "aptIdx": 0,
+        "roomIdx": 0
+      },
+      "room2": {
+        "aptIdx": 0,
+        "roomIdx": 2
+      },
+      "val": 5
+    }
+  ],
+  "distGreaterThan": []
+}

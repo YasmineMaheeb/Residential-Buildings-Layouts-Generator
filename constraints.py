@@ -215,7 +215,7 @@ def aptOpenAreaConstraint(model, apt, onOpenArea, grid):
             if key in ["bottom", "top"]:
                 boolvars.append(isOnBorder(model, 0 if key == "top" else len(grid) - 1, True, room))
             else:
-                boolvars.append(isOnBorder(model, 0 if key == "left" else len(grid[0]) - 1, True, room))
+                boolvars.append(isOnBorder(model, 0 if key == "left" else len(grid[0]) - 1, False, room))
     model.AddBoolOr(boolvars)
 
 

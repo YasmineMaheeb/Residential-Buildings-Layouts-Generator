@@ -1,6 +1,6 @@
 {
-  "length": 8,
-  "width": 8,
+  "length": 16,
+  "width": 16,
   "apartments": [
     [
       {
@@ -97,5 +97,5 @@
     }
   ],
   "distGreaterThan": [],
-  "divine": []
+  "divine": ["K_AP2_1"]
 }

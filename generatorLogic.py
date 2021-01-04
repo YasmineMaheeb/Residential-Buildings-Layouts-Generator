@@ -83,6 +83,10 @@ if __name__ == "__main__":
     else:
         apartments = [[createRoom(room['val'], room['minArea'], room['minHeight'], room['minWidth'])
                        for room in apt] for apt in jsonInput["apartments"]]
+        for apt in apartments:
+            for room in apt:
+                if room['val'] in jsonInput["divine"]:
+                    divPropRooms.append(room)
 
     corridors = [createRoom(f'xxxxxxxx{i}', 1)
                  for i in range(numberOfApartments)]

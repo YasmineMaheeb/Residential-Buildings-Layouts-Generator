@@ -134,5 +134,6 @@
   "symmetricApartments": true,
   "symmetricPairs": [[0,1]],
   "distLessThan": [],
-  "distGreaterThan": []
+  "distGreaterThan": [],
+  "divine": []
 }

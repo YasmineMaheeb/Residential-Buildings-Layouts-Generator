@@ -90,14 +90,9 @@
   ],
   "distLessThan": [
     {
-      "room1": {
-        "aptIdx": 0,
-        "roomIdx": 0
-      },
-      "room2": {
-        "aptIdx": 0,
-        "roomIdx": 2
-      },
+      "aptIdx": 0,
+      "room1Idx": 0,
+      "room2Idx": 2,
       "val": 5
     }
   ],

@@ -131,12 +131,11 @@ if __name__ == "__main__":
             distLessThan.append((apartments[apartmentId][x], apartments[apartmentId][y], d))
     else:
         for pair in jsonInput["distLessThan"]:
-            room1 = pair["room1"]
-            room2 = pair["room2"]
+            aptIdx = pair["aptIdx"]
+            room1Idx = pair["room1Idx"]
+            room2Idx = pair["room2Idx"]
             d = pair["val"]
-            distLessThan.append(
-                (apartments[room1["aptIdx"]][room1["roomIdx"]], apartments[room1["aptIdx"]][room1["roomIdx"]], d)
-            )
+            distLessThan.append((apartments[aptIdx][room1Idx], apartments[aptIdx][room2Idx], d))
 
     distGreaterThan = []
     if not readFromFile:
@@ -152,12 +151,11 @@ if __name__ == "__main__":
             distGreaterThan.append((apartments[apartmentId][x], apartments[apartmentId][y], d))
     else:
         for pair in jsonInput["distGreaterThan"]:
-            room1 = pair["room1"]
-            room2 = pair["room2"]
+            aptIdx = pair["aptIdx"]
+            room1Idx = pair["room1Idx"]
+            room2Idx = pair["room2Idx"]
             d = pair["val"]
-            distGreaterThan.append(
-                (apartments[room1["aptIdx"]][room1["roomIdx"]], apartments[room1["aptIdx"]][room1["roomIdx"]], d)
-            )
+            distLessThan.append((apartments[aptIdx][room1Idx], apartments[aptIdx][room2Idx], d))
 
     countLessThan = getCountDistanceLessThan(model, distLessThan, maxVal)
     countGreaterThan = getCountDistanceGreaterThan(model, distGreaterThan, maxVal)
